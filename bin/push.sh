@@ -1,11 +1,15 @@
 #!/bin/bash
 
-# Скрипт для пуша изменений в оба репозитория: origin и verse
+# Константа — ветка по умолчанию
+BRANCH_DEFAULT="main"
 
-echo "Публикуем изменения в origin..."
-git push origin main
+# Если передан аргумент — используем его, иначе — значение по умолчанию
+BRANCH=${1:-$BRANCH_DEFAULT}
 
-echo "Публикуем изменения в verse..."
-git push vers main
+echo "Публикуем изменения в origin на ветку $BRANCH..."
+git push origin "$BRANCH"
+
+echo "Публикуем изменения в verse на ветку $BRANCH..."
+git push verse "$BRANCH"
 
 echo "Синхронизация завершена."
