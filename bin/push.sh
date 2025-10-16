@@ -1,23 +1,50 @@
 #!/bin/bash
 
-# Константа — ветка по умолчанию
-BRANCH_DEFAULT="main"
+# Получаем текущую ветку
+CURRENT_BRANCH=$(git branch --show-current)
 
-# Если передан аргумент — используем его, иначе — значение по умолчанию
-BRANCH=${1:-$BRANCH_DEFAULT}
+# Запрашиваем ветку
+read -p "Введите имя ветки для пуша (Enter = $CURRENT_BRANCH): " BRANCH
+BRANCH=${BRANCH:-$CURRENT_BRANCH}
 
-echo "=== Синхронизация репозиториев ==="
-echo "Используем ветку: $BRANCH"
+echo ""
+echo "Выбрана ветка: $BRANCH"
 
-# Получаем список всех удалённых репозиториев
-REPOS=$(git remote)
+# Получаем список удалённых репозиториев
+REPOS=($(git remote))
+REPO_COUNT=${#REPOS[@]}
+
+if [ "$REPO_COUNT" -eq 0 ]; then
+    echo "Нет удалённых репозиториев."
+    exit 1
+fi
+
+# Выводим список репозиториев
+echo "Доступные репозитории:"
+for i in "${!REPOS[@]}"; do
+    echo "$((i+1)) - ${REPOS[$i]}"
+done
+
+# Запрашиваем выбор
+read -p "Выберите репозиторий по номеру (Enter = все): " CHOICE
+
+# Проверяем, был ли введён номер
+if [[ "$CHOICE" =~ ^[0-9]+$ && "$CHOICE" -ge 1 && "$CHOICE" -le "$REPO_COUNT" ]]; then
+    SELECTED_REPO="${REPOS[$((CHOICE-1))]}"
+    echo ""
+    echo "Пушим только в репозиторий: $SELECTED_REPO"
+    REMOTES_TO_PUSH=("$SELECTED_REPO")
+else
+    echo ""
+    echo "Пушим во все репозитории:"
+    REMOTES_TO_PUSH=("${REPOS[@]}")
+fi
 
 SUCCESS_COUNT=0
 FAILED_COUNT=0
 
-for REMOTE in $REPOS; do
-    echo ""
-    echo "Пушим в репозиторий $REMOTE на ветку $BRANCH..."
+for REMOTE in "${REMOTES_TO_PUSH[@]}"; do
+    echo "Пушим в $REMOTE на ветку $BRANCH..."
 
     # Проверяем доступность репозитория
     if ! git ls-remote "$REMOTE" &> /dev/null; then
