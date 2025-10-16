@@ -43,6 +43,10 @@ curl -fsSL https://raw.githubusercontent.com/kolelan/remote-sync/main/bin/push.s
 chmod +x bin/push.sh
 ```
 
+### Можно сделать алиас
+```bash
+alias push-all='./bin/push.sh'
+```
 ## Работаем с любым количеством репозиториев
 
 Добавляем репозитории
